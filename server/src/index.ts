@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { sequelize } from './models';
 import formsRouter from './routes/forms';
+import { seedDatabase } from './seeders';
 
 dotenv.config();
 
@@ -38,6 +39,12 @@ async function initializeDatabase() {
     
     await sequelize.sync({ force: false });
     console.log('Database synchronized successfully.');
+    
+    // Check if we should seed the database
+    if (process.env.SEED_DATABASE === 'true') {
+      console.log('🌱 Seeding database with sample data...');
+      await seedDatabase();
+    }
   } catch (error) {
     console.error('Unable to connect to the database:', error);
     process.exit(1);
