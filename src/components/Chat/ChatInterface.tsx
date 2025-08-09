@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
 import { ChatMessage, SelectedElement } from '../../types';
 import { apiService } from '../../services/api';
+import TemplateSelector from './TemplateSelector';
 
 interface ChatInterfaceProps {
   selectedElements: SelectedElement[];
@@ -16,12 +17,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     {
       id: '1',
       type: 'assistant',
-      content: 'Hello! I\'m your AI Form Builder assistant powered by advanced language models. Tell me what kind of form you\'d like to create, and I\'ll help you build it step by step. You can describe your requirements in natural language, and I\'ll ask clarifying questions to ensure we create exactly what you need.',
+      content: 'Hello! I\'m your AI Form Builder assistant. Tell me what kind of form you\'d like to create, and I\'ll help you build it step by step. You can describe your requirements in natural language.',
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,40 +50,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     try {
       // Generate form from prompt
-      const result = await apiService.generateForm(inputValue, selectedElements);
+      const generatedForm = await apiService.generateForm(inputValue, selectedElements);
       
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: result.explanation || 'I\'ve generated a form based on your requirements. You can see the preview and code in the tabs above.',
+        content: 'I\'ve generated a form based on your requirements. You can see the preview and code in the tabs above. Would you like me to modify anything?',
         timestamp: new Date(),
-        formData: result.form
+        formData: generatedForm
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      onFormGenerated(result.form);
-
-      // Add suggestions if available
-      if (result.suggestions && result.suggestions.length > 0) {
-        const suggestionsMessage: ChatMessage = {
-          id: (Date.now() + 2).toString(),
-          type: 'assistant',
-          content: `Here are some suggestions to improve your form:\n${result.suggestions.map((s: string, i: number) => `${i + 1}. ${s}`).join('\n')}`,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, suggestionsMessage]);
-      }
-
-      // Ask clarifying questions if needed
-      if (result.clarifyingQuestions && result.clarifyingQuestions.length > 0) {
-        const questionMessage: ChatMessage = {
-          id: (Date.now() + 3).toString(),
-          type: 'assistant',
-          content: `I have a few questions to make your form even better:\n${result.clarifyingQuestions.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}`,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, questionMessage]);
-      }
+      onFormGenerated(generatedForm);
       
     } catch (error) {
       console.error('Error generating form:', error);
@@ -89,7 +69,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'I apologize, but I encountered an error while generating your form. This might be due to API limitations or connectivity issues. Please try again with a different prompt, or check if your LLM API keys are properly configured.',
+        content: 'I apologize, but I encountered an error while generating your form. Please try again with a different prompt.',
         timestamp: new Date()
       };
 
@@ -104,6 +84,30 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleTemplateSelect = (template: any) => {
+    const templateMessage: ChatMessage = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: `Use the "${template.name}" template`,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, templateMessage]);
+    setShowTemplates(false);
+    
+    // Generate form from template
+    const assistantMessage: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      type: 'assistant',
+      content: `I've loaded the "${template.name}" template for you. You can see the preview above and customize it further by describing any changes you'd like to make.`,
+      timestamp: new Date(),
+      formData: template.structure
+    };
+
+    setMessages(prev => [...prev, assistantMessage]);
+    onFormGenerated(template.structure);
   };
 
   return (
@@ -182,13 +186,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       {/* Input Area */}
       <div className="p-4 border-t border-gray-200">
+        <div className="flex items-center justify-between mb-3">
+          <button
+            onClick={() => setShowTemplates(true)}
+            className="flex items-center space-x-2 text-sm text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <Sparkles className="h-4 w-4" />
+            <span>Browse Templates</span>
+          </button>
+        </div>
+        
         <div className="flex items-end space-x-3">
           <div className="flex-1">
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Describe the form you'd like to create (e.g., 'Create a multi-page job application form with personal info, work experience, and file upload for resume')"
+              placeholder="Describe the form you'd like to create (e.g., 'Create a contact form with name, email, phone, and message fields')"
               className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
               disabled={isLoading}
@@ -207,6 +221,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </button>
         </div>
       </div>
+      
+      {showTemplates && (
+        <TemplateSelector
+          onTemplateSelect={handleTemplateSelect}
+          onClose={() => setShowTemplates(false)}
+        />
+      )}
     </div>
   );
 };
