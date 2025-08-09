@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FormTheme } from '../../types';
-import { Palette, Type, Layout, Rounded } from 'lucide-react';
+import { Palette, Type, Layout, KeyRound as Rounded } from 'lucide-react';
 
 interface ThemeCustomizerProps {
   currentTheme: FormTheme;
