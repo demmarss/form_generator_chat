@@ -1,6 +1,8 @@
 import express from 'express';
 import { Form, Page, Section, Row, Element } from '../models';
 import { Op } from 'sequelize';
+import { llmService } from '../services/llm';
+import { mcpService } from '../services/mcp';
 
 const router = express.Router();
 
@@ -125,107 +127,59 @@ router.delete('/:id', async (req, res) => {
 // Generate form from prompt
 router.post('/generate', async (req, res) => {
   try {
-    const { prompt, selectedElements } = req.body;
+    const { prompt, selectedElements, context } = req.body;
     
-    // Mock AI form generation - in production, integrate with actual LLM
-    const generatedForm = await generateFormFromPrompt(prompt, selectedElements);
+    // Use real LLM service for form generation
+    const result = await llmService.generateForm({
+      prompt,
+      selectedElements,
+      context
+    });
     
-    res.json(generatedForm);
+    res.json(result);
   } catch (error) {
     console.error('Error generating form:', error);
-    res.status(500).json({ error: 'Failed to generate form' });
+    res.status(500).json({ 
+      error: 'Failed to generate form',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 });
 
-// Mock form generation function
-async function generateFormFromPrompt(prompt: string, selectedElements?: any[]) {
-  // This is a mock implementation - integrate with actual LLM service
-  const formData = {
-    title: extractTitleFromPrompt(prompt),
-    subtitle: 'Generated form',
-    description: prompt,
-    isMultiPage: prompt.toLowerCase().includes('multi') || prompt.toLowerCase().includes('page'),
-    status: 'draft' as const,
-    pages: [{
-      title: 'Page 1',
-      pageNumber: 1,
-      sections: [{
-        title: 'Main Section',
-        sectionNumber: 1,
-        rows: generateRowsFromPrompt(prompt, selectedElements)
-      }]
-    }]
-  };
-  
-  return formData;
-}
+// Get form templates from MCP
+router.get('/templates', async (req, res) => {
+  try {
+    const { category } = req.query;
+    const templates = await mcpService.getFormTemplates(category as string);
+    res.json(templates);
+  } catch (error) {
+    console.error('Error fetching templates:', error);
+    res.status(500).json({ error: 'Failed to fetch templates' });
+  }
+});
 
-function extractTitleFromPrompt(prompt: string): string {
-  // Simple title extraction - improve with actual NLP
-  const words = prompt.split(' ').slice(0, 5);
-  return words.join(' ') + ' Form';
-}
+// Get validation suggestions
+router.post('/validate-suggestions', async (req, res) => {
+  try {
+    const { formStructure } = req.body;
+    const suggestions = await mcpService.getValidationSuggestions(formStructure);
+    res.json(suggestions);
+  } catch (error) {
+    console.error('Error getting validation suggestions:', error);
+    res.status(500).json({ error: 'Failed to get validation suggestions' });
+  }
+});
 
-function generateRowsFromPrompt(prompt: string, selectedElements?: any[]) {
-  const rows = [];
-  let rowNumber = 1;
-  
-  // Basic form element detection
-  if (prompt.toLowerCase().includes('name')) {
-    rows.push({
-      rowNumber: rowNumber++,
-      rowName: `row_${rowNumber}`,
-      elements: [{
-        type: 'text',
-        label: 'Full Name',
-        name: 'fullName',
-        required: true,
-        elementNumber: 1
-      }]
-    });
+// Ask clarifying question
+router.post('/clarify', async (req, res) => {
+  try {
+    const { context, userResponse } = req.body;
+    const question = await llmService.askClarifyingQuestion(context, userResponse);
+    res.json({ question });
+  } catch (error) {
+    console.error('Error generating clarifying question:', error);
+    res.status(500).json({ error: 'Failed to generate clarifying question' });
   }
-  
-  if (prompt.toLowerCase().includes('email')) {
-    rows.push({
-      rowNumber: rowNumber++,
-      rowName: `row_${rowNumber}`,
-      elements: [{
-        type: 'email',
-        label: 'Email Address',
-        name: 'email',
-        required: true,
-        elementNumber: 1
-      }]
-    });
-  }
-  
-  if (prompt.toLowerCase().includes('phone')) {
-    rows.push({
-      rowNumber: rowNumber++,
-      rowName: `row_${rowNumber}`,
-      elements: [{
-        type: 'tel',
-        label: 'Phone Number',
-        name: 'phone',
-        required: false,
-        elementNumber: 1
-      }]
-    });
-  }
-  
-  // Add more intelligent parsing based on prompt
-  
-  return rows.length > 0 ? rows : [{
-    rowNumber: 1,
-    rowName: 'row_1',
-    elements: [{
-      type: 'text',
-      label: 'Input Field',
-      name: 'input1',
-      required: false,
-      elementNumber: 1
-    }]
-  }];
-}
+});
 
 export default router;

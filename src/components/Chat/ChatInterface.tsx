@@ -16,7 +16,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     {
       id: '1',
       type: 'assistant',
-      content: 'Hello! I\'m your AI Form Builder assistant. Tell me what kind of form you\'d like to create, and I\'ll help you build it step by step. You can describe your requirements in natural language.',
+      content: 'Hello! I\'m your AI Form Builder assistant powered by advanced language models. Tell me what kind of form you\'d like to create, and I\'ll help you build it step by step. You can describe your requirements in natural language, and I\'ll ask clarifying questions to ensure we create exactly what you need.',
       timestamp: new Date()
     }
   ]);
@@ -48,18 +48,40 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     try {
       // Generate form from prompt
-      const generatedForm = await apiService.generateForm(inputValue, selectedElements);
+      const result = await apiService.generateForm(inputValue, selectedElements);
       
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'I\'ve generated a form based on your requirements. You can see the preview and code in the tabs above. Would you like me to modify anything?',
+        content: result.explanation || 'I\'ve generated a form based on your requirements. You can see the preview and code in the tabs above.',
         timestamp: new Date(),
-        formData: generatedForm
+        formData: result.form
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-      onFormGenerated(generatedForm);
+      onFormGenerated(result.form);
+
+      // Add suggestions if available
+      if (result.suggestions && result.suggestions.length > 0) {
+        const suggestionsMessage: ChatMessage = {
+          id: (Date.now() + 2).toString(),
+          type: 'assistant',
+          content: `Here are some suggestions to improve your form:\n${result.suggestions.map((s: string, i: number) => `${i + 1}. ${s}`).join('\n')}`,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, suggestionsMessage]);
+      }
+
+      // Ask clarifying questions if needed
+      if (result.clarifyingQuestions && result.clarifyingQuestions.length > 0) {
+        const questionMessage: ChatMessage = {
+          id: (Date.now() + 3).toString(),
+          type: 'assistant',
+          content: `I have a few questions to make your form even better:\n${result.clarifyingQuestions.map((q: string, i: number) => `${i + 1}. ${q}`).join('\n')}`,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, questionMessage]);
+      }
       
     } catch (error) {
       console.error('Error generating form:', error);
@@ -67,7 +89,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: 'I apologize, but I encountered an error while generating your form. Please try again with a different prompt.',
+        content: 'I apologize, but I encountered an error while generating your form. This might be due to API limitations or connectivity issues. Please try again with a different prompt, or check if your LLM API keys are properly configured.',
         timestamp: new Date()
       };
 
@@ -166,7 +188,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Describe the form you'd like to create (e.g., 'Create a contact form with name, email, phone, and message fields')"
+              placeholder="Describe the form you'd like to create (e.g., 'Create a multi-page job application form with personal info, work experience, and file upload for resume')"
               className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               rows={3}
               disabled={isLoading}
