@@ -59,6 +59,55 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
   formData?: any;
+  attachments?: FileAttachment[];
+  suggestions?: string[];
+}
+
+export interface FileAttachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+}
+
+export interface FormAnalytics {
+  id: string;
+  formId: string;
+  views: number;
+  submissions: number;
+  completionRate: number;
+  averageTime: number;
+  dropoffPoints: { [key: string]: number };
+  deviceStats: { mobile: number; desktop: number; tablet: number };
+  createdAt: string;
+}
+
+export interface FormTheme {
+  id: string;
+  name: string;
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    text: string;
+    border: string;
+  };
+  fonts: {
+    heading: string;
+    body: string;
+  };
+  spacing: 'compact' | 'normal' | 'spacious';
+  borderRadius: 'none' | 'small' | 'medium' | 'large';
+}
+
+export interface FormIntegration {
+  id: string;
+  formId: string;
+  type: 'webhook' | 'email' | 'zapier' | 'slack' | 'sheets' | 'crm';
+  config: any;
+  isActive: boolean;
 }
 
 export interface SelectedElement {
@@ -66,4 +115,5 @@ export interface SelectedElement {
   id: string;
   name: string;
   data: any;
+  path?: string;
 }

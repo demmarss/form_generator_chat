@@ -4,15 +4,37 @@ import Sidebar from './components/Layout/Sidebar';
 import ChatInterface from './components/Chat/ChatInterface';
 import FormPreview from './components/FormBuilder/FormPreview';
 import CodeViewer from './components/FormBuilder/CodeViewer';
+import FormAnalytics from './components/FormBuilder/FormAnalytics';
+import ThemeCustomizer from './components/FormBuilder/ThemeCustomizer';
+import IntegrationManager from './components/FormBuilder/IntegrationManager';
+import A11yChecker from './components/FormBuilder/A11yChecker';
 import { Form, SelectedElement } from './types';
-import { MessageSquare, Eye, Code, Settings } from 'lucide-react';
+import { MessageSquare, Eye, Code, BarChart3, Palette, Zap, Shield } from 'lucide-react';
 
 function App() {
   const [selectedForm, setSelectedForm] = useState<Form | null>(null);
   const [generatedForm, setGeneratedForm] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'chat' | 'preview' | 'code'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'preview' | 'code' | 'analytics' | 'theme' | 'integrations' | 'accessibility'>('chat');
   const [selectedElements, setSelectedElements] = useState<SelectedElement[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState({
+    id: 'modern',
+    name: 'Modern Blue',
+    colors: {
+      primary: '#3B82F6',
+      secondary: '#64748B',
+      accent: '#10B981',
+      background: '#FFFFFF',
+      text: '#1F2937',
+      border: '#E5E7EB'
+    },
+    fonts: {
+      heading: 'Inter',
+      body: 'Inter'
+    },
+    spacing: 'normal' as const,
+    borderRadius: 'medium' as const
+  });
 
   const handleNewForm = () => {
     setSelectedForm(null);
@@ -106,11 +128,64 @@ function App() {
                 <Code className="h-4 w-4" />
                 <span>Code</span>
               </button>
+              
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === 'analytics'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+                disabled={!displayForm}
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span>Analytics</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('theme')}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === 'theme'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+                disabled={!displayForm}
+              >
+                <Palette className="h-4 w-4" />
+                <span>Theme</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('integrations')}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === 'integrations'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+                disabled={!displayForm}
+              >
+                <Zap className="h-4 w-4" />
+                <span>Integrations</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('accessibility')}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === 'accessibility'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+                disabled={!displayForm}
+              >
+                <Shield className="h-4 w-4" />
+                <span>A11y</span>
+              </button>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden flex">
+            <div className="flex-1 overflow-hidden">
             {activeTab === 'chat' && (
               <ChatInterface
                 selectedElements={selectedElements}
@@ -137,6 +212,27 @@ function App() {
             
             {activeTab === 'code' && (
               <CodeViewer form={displayForm} />
+            )}
+            
+            {activeTab === 'analytics' && displayForm && (
+              <FormAnalytics form={displayForm} />
+            )}
+            
+            {activeTab === 'integrations' && displayForm && (
+              <IntegrationManager formId={displayForm.id} />
+            )}
+            
+            {activeTab === 'accessibility' && displayForm && (
+              <A11yChecker form={displayForm} />
+            )}
+            </div>
+            
+            {/* Theme Customizer Sidebar */}
+            {activeTab === 'theme' && displayForm && (
+              <ThemeCustomizer
+                currentTheme={currentTheme}
+                onThemeChange={setCurrentTheme}
+              />
             )}
           </div>
         </div>
