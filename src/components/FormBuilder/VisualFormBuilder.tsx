@@ -325,34 +325,30 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
                   Where would you like to add this element?
                 </p>
                 <div className="space-y-3">
-                  {modalData.targetRow && (
-                    <button
-                      onClick={() => {
-                        handleAddElement(modalData.template!, { type: 'row', rowId: modalData.targetRow!.id }, 'existing');
-                        setShowAddModal(false);
-                      }}
-                      className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
-                    >
-                      <div className="font-medium text-gray-900">Add to this row</div>
-                      <div className="text-sm text-gray-500">
-                        Add to Row {modalData.targetRow.rowNumber} ({modalData.targetRow.elements.length} existing elements)
-                      </div>
-                    </button>
-                  )}
-                  {modalData.targetRow && (
-                    <button
-                     onClick={() => {
-                       handleAddElement(modalData.template!, { type: 'section', sectionId: modalData.targetSection?.id }, 'new');
-                       setShowAddModal(false);
-                     }}
-                      className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
-                    >
-                      <div className="font-medium text-gray-900">Create new row</div>
-                      <div className="text-sm text-gray-500">
-                        Create a new row in {modalData.targetSection?.title}
-                      </div>
-                    </button>
-                  )}
+                  <button
+                    onClick={() => {
+                      handleAddElement(modalData.template!, { type: 'row', rowId: modalData.targetRow!.id }, 'existing');
+                      setShowAddModal(false);
+                    }}
+                    className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  >
+                    <div className="font-medium text-gray-900">Add to this row</div>
+                    <div className="text-sm text-gray-500">
+                      Add to Row {modalData.targetRow?.rowNumber} ({modalData.targetRow?.elements.length} existing elements)
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleAddElement(modalData.template!, { type: 'section', sectionId: modalData.targetSection?.id }, 'new');
+                      setShowAddModal(false);
+                    }}
+                    className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
+                  >
+                    <div className="font-medium text-gray-900">Create new row</div>
+                    <div className="text-sm text-gray-500">
+                      Create a new row in {modalData.targetSection?.title}
+                    </div>
+                  </button>
                 </div>
                <div className="flex justify-end space-x-3 mt-6">
                   <button
