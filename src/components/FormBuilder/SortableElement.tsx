@@ -1,5 +1,5 @@
 import React from 'react';
-import { useSortable } from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
 import { FormElement, SelectedElement } from '../../types';
 import { 
   Type, Mail, Phone, MessageSquare, List, CheckSquare, 

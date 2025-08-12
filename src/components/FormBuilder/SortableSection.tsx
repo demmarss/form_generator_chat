@@ -1,5 +1,6 @@
 import React from 'react';
-import { useSortable, useDroppable } from '@dnd-kit/core';
+import { useDroppable } from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { FormSection, SelectedElement } from '../../types';
 import SortableRow from './SortableRow';
