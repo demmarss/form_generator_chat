@@ -45,6 +45,32 @@ function App() {
     setIsEditMode(false);
   };
 
+  const handleNewBuilder = () => {
+    // Create a new blank form for the visual builder
+    const newForm: Form = {
+      id: `form_${Date.now()}`,
+      title: 'New Form',
+      subtitle: '',
+      description: '',
+      isMultiPage: false,
+      status: 'draft',
+      pages: [{
+        id: `page_${Date.now()}`,
+        formId: `form_${Date.now()}`,
+        title: 'Page 1',
+        pageNumber: 1,
+        sections: []
+      }],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    setSelectedForm(newForm);
+    setGeneratedForm(null);
+    setActiveTab('builder');
+    setSelectedElements([]);
+    setIsEditMode(true);
+  };
   const handleSelectForm = (form: Form) => {
     setSelectedForm(form);
     setGeneratedForm(null);
@@ -78,7 +104,7 @@ function App() {
 
   return (
     <div className="h-screen bg-gray-100 flex flex-col">
-      <Header onNewForm={handleNewForm} />
+      <Header onNewForm={handleNewForm} onNewBuilder={handleNewBuilder} />
       
       <div className="flex-1 flex overflow-hidden">
         <Sidebar

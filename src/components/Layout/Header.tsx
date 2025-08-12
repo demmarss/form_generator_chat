@@ -1,11 +1,12 @@
 import React from 'react';
-import { FileText, Plus } from 'lucide-react';
+import { FileText, Plus, Layout } from 'lucide-react';
 
 interface HeaderProps {
   onNewForm: () => void;
+  onNewBuilder: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNewForm }) => {
+const Header: React.FC<HeaderProps> = ({ onNewForm, onNewBuilder }) => {
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -18,13 +19,22 @@ const Header: React.FC<HeaderProps> = ({ onNewForm }) => {
             <p className="text-sm text-gray-500">AI-Powered Form Builder</p>
           </div>
         </div>
-        <button
-          onClick={onNewForm}
-          className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          <span>New Form</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={onNewBuilder}
+            className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <Layout className="h-4 w-4" />
+            <span>Visual Builder</span>
+          </button>
+          <button
+            onClick={onNewForm}
+            className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New Form</span>
+          </button>
+        </div>
       </div>
     </header>
   );
