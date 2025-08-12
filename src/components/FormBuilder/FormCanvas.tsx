@@ -77,6 +77,7 @@ const FormCanvas: React.FC<FormCanvasProps> = ({
               selectedElement={selectedElement}
               onElementSelect={onElementSelect}
               onAddRow={onAddRow}
+              onRowAddElement={onRowAddElement}
             />
           ))}
         </SortableContext>

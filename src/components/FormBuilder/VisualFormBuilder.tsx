@@ -25,6 +25,14 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
   const [activePageIndex, setActivePageIndex] = useState(0);
   const [draggedItem, setDraggedItem] = useState<any>(null);
   const [showPropertyPanel, setShowPropertyPanel] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [modalData, setModalData] = useState<{
+    template: ElementTemplate | null;
+    targetRow: FormRow | null;
+    targetSection: FormSection | null;
+  }>({ template: null, targetRow: null, targetSection: null });
+  const [showElementSelector, setShowElementSelector] = useState(false);
+  const [selectedRowForAdd, setSelectedRowForAdd] = useState<FormRow | null>(null);
 
   if (!form) {
     return (
@@ -58,15 +66,31 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
     const dropData = over.data.current;
 
     if (draggedData?.template) {
-      // Adding new element from selector
-      handleAddElement(draggedData.template, dropData);
+      // Show modal for adding element
+      if (dropData?.type === 'row') {
+        const targetRow = currentPage.sections
+          .flatMap(s => s.rows)
+          .find(r => r.id === dropData.rowId);
+        const targetSection = currentPage.sections
+          .find(s => s.rows.some(r => r.id === dropData.rowId));
+        
+        setModalData({
+          template: draggedData.template,
+          targetRow,
+          targetSection
+        });
+        setShowAddModal(true);
+      } else {
+        // Direct add to section or canvas
+        handleAddElement(draggedData.template, dropData, 'new');
+      }
     } else if (draggedData?.element) {
       // Moving existing element
       handleMoveElement(draggedData, dropData);
     }
   };
 
-  const handleAddElement = (template: ElementTemplate, dropTarget: any) => {
+  const handleAddElement = (template: ElementTemplate, dropTarget: any, action: 'existing' | 'new' = 'new') => {
     if (!form || !currentPage) return;
 
     const newElement: FormElement = {
@@ -83,10 +107,8 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
       elementNumber: 1
     };
 
-    console.log('Drop target:', dropTarget);
-
-    // Check if dropping on an existing row
-    if (dropTarget?.type === 'row' && dropTarget?.rowId) {
+    // Handle adding to existing row
+    if (action === 'existing' && dropTarget?.type === 'row' && dropTarget?.rowId) {
       // Find the section and row
       const targetSection = currentPage.sections.find(s => 
         s.rows.some(r => r.id === dropTarget.rowId)
@@ -98,11 +120,10 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
         newElement.rowId = targetRow.id;
         newElement.elementNumber = targetRow.elements.length + 1;
         targetRow.elements.push(newElement);
-        console.log('Added element to existing row:', targetRow.id);
       }
     }
-    // Check if dropping on a section (create new row)
-    else if (dropTarget?.type === 'section' && dropTarget?.sectionId) {
+    // Handle creating new row in section
+    else if (action === 'new' && dropTarget?.type === 'section' && dropTarget?.sectionId) {
       const targetSection = currentPage.sections.find(s => s.id === dropTarget.sectionId);
       
       if (targetSection) {
@@ -117,10 +138,9 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
         targetSection.rows.push(newRow);
         newElement.rowId = newRow.id;
         newRow.elements.push(newElement);
-        console.log('Created new row in section:', targetSection.id);
       }
     }
-    // Default: add to canvas (create section and row if needed)
+    // Handle creating new row (default behavior)
     else {
       let targetSection: FormSection;
       
@@ -149,7 +169,6 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
       targetSection.rows.push(newRow);
       newElement.rowId = newRow.id;
       newRow.elements.push(newElement);
-      console.log('Created new section/row on canvas');
     }
 
     onFormUpdate({ ...form });
@@ -277,6 +296,77 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
             </div>
           )}
         </DragOverlay>
+
+        {/* Add Element Modal */}
+        {showAddModal && modalData.template && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+              <div className="p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Add "{modalData.template.label}" Element
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Where would you like to add this element?
+                </p>
+                <div className="space-y-3">
+                  {modalData.targetRow && (
+                    <button
+                      onClick={() => handleModalChoice('existing')}
+                      className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                    >
+                      <div className="font-medium text-gray-900">Add to existing row</div>
+                      <div className="text-sm text-gray-500">
+                        Add to Row {modalData.targetRow.rowNumber} ({modalData.targetRow.elements.length} existing elements)
+                      </div>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleModalChoice('new')}
+                    className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
+                  >
+                    <div className="font-medium text-gray-900">Create new row</div>
+                    <div className="text-sm text-gray-500">
+                      Create a new row in {modalData.targetSection?.title}
+                    </div>
+                  </button>
+                </div>
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={() => setShowAddModal(false)}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Element Selector Modal */}
+        {showElementSelector && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900">Select Element to Add</h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Choose an element to add to Row {selectedRowForAdd?.rowNumber}
+                </p>
+              </div>
+              <div className="p-6 overflow-y-auto max-h-96">
+                <ElementSelector onElementSelect={handleElementSelectorChoice} />
+              </div>
+              <div className="p-6 border-t border-gray-200 flex justify-end">
+                <button
+                  onClick={() => setShowElementSelector(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DndContext>
   );

@@ -122,7 +122,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
           }`}>
             <Plus className="h-6 w-6 text-gray-300 mx-auto mb-2" />
             <p className="text-gray-500 text-sm">
-              Drop elements here to add to this row
+              Drop elements here or click the + button above to add elements
             </p>
           </div>
         ) : (
