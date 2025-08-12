@@ -71,7 +71,7 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
 
     const newElement: FormElement = {
       id: `element_${Date.now()}`,
-      rowId: dropTarget?.rowId || '',
+      rowId: '',
       type: template.type,
       label: template.defaultProps.label || template.label,
       name: `${template.type}_${Date.now()}`,
@@ -88,14 +88,29 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
     let targetSection: FormSection;
 
     if (dropTarget?.rowId) {
-      // Add to existing row
+      // Add to existing row - find the section containing this row
       targetSection = currentPage.sections.find(s => 
         s.rows.some(r => r.id === dropTarget.rowId)
       )!;
       targetRow = targetSection.rows.find(r => r.id === dropTarget.rowId)!;
+      newElement.rowId = targetRow.id;
       newElement.elementNumber = targetRow.elements.length + 1;
+      targetRow.elements.push(newElement);
+    } else if (dropTarget?.sectionId) {
+      // Add to section - create new row
+      targetSection = currentPage.sections.find(s => s.id === dropTarget.sectionId)!;
+      targetRow = {
+        id: `row_${Date.now()}`,
+        sectionId: targetSection.id,
+        rowNumber: targetSection.rows.length + 1,
+        rowName: `${targetSection.title.toLowerCase().replace(/\s+/g, '_')}_row_${targetSection.rows.length + 1}`,
+        elements: []
+      };
+      targetSection.rows.push(targetRow);
+      newElement.rowId = targetRow.id;
+      targetRow.elements.push(newElement);
     } else {
-      // Create new row in first section or create section
+      // Add to canvas - create section and row if needed
       if (currentPage.sections.length === 0) {
         targetSection = {
           id: `section_${Date.now()}`,
@@ -118,9 +133,9 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
       };
       targetSection.rows.push(targetRow);
       newElement.rowId = targetRow.id;
+      targetRow.elements.push(newElement);
     }
 
-    targetRow.elements.push(newElement);
     onFormUpdate({ ...form });
   };
 

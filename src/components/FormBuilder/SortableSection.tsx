@@ -33,7 +33,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
 
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: `section-drop-${section.id}`,
-    data: { type: 'section', sectionId: section.id }
+    data: { type: 'section', sectionId: section.id, acceptsElements: true }
   });
 
   const style = {
@@ -126,7 +126,9 @@ const SortableSection: React.FC<SortableSectionProps> = ({
       {/* Section Content */}
       <div className="p-4">
         {section.rows.length === 0 ? (
-          <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+          <div className={`text-center py-8 border-2 border-dashed rounded-lg transition-colors ${
+            isOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
+          }`}>
             <Plus className="h-8 w-8 text-gray-300 mx-auto mb-2" />
             <p className="text-gray-500 text-sm">
               Drop elements here or click "Add Row" to add form fields
@@ -137,7 +139,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
             items={section.rows.map(r => r.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-4">
+            <div className={`space-y-4 ${isOver ? 'bg-blue-50 p-4 rounded-lg border-2 border-dashed border-blue-300' : ''}`}>
               {section.rows.map((row) => (
                 <SortableRow
                   key={row.id}

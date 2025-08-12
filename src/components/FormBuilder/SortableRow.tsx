@@ -31,7 +31,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
 
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: `row-drop-${row.id}`,
-    data: { type: 'row', rowId: row.id }
+    data: { type: 'row', rowId: row.id, acceptsElements: true }
   });
 
   const style = {
@@ -112,7 +112,9 @@ const SortableRow: React.FC<SortableRowProps> = ({
       {/* Row Content */}
       <div className="p-3">
         {row.elements.length === 0 ? (
-          <div className="text-center py-6 border-2 border-dashed border-gray-300 rounded-lg bg-white">
+          <div className={`text-center py-6 border-2 border-dashed rounded-lg bg-white transition-colors ${
+            isOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
+          }`}>
             <Plus className="h-6 w-6 text-gray-300 mx-auto mb-2" />
             <p className="text-gray-500 text-sm">
               Drop form elements here
@@ -123,11 +125,12 @@ const SortableRow: React.FC<SortableRowProps> = ({
             items={row.elements.map(e => e.id)}
             strategy={horizontalListSortingStrategy}
           >
-            <div className={`grid gap-4 ${
+            <div className={`grid gap-4 transition-all ${
               row.elements.length === 1 ? 'grid-cols-1' :
               row.elements.length === 2 ? 'grid-cols-2' :
-              'grid-cols-3'
-            }`}>
+              row.elements.length === 3 ? 'grid-cols-3' :
+              'grid-cols-4'
+            } ${isOver ? 'bg-blue-50 p-2 rounded-lg border-2 border-dashed border-blue-300' : ''}`}>
               {row.elements.map((element) => (
                 <SortableElement
                   key={element.id}
@@ -136,6 +139,12 @@ const SortableRow: React.FC<SortableRowProps> = ({
                   onElementSelect={onElementSelect}
                 />
               ))}
+              {/* Drop zone for adding more elements to existing row */}
+              {isOver && (
+                <div className="flex items-center justify-center min-h-[100px] border-2 border-dashed border-blue-400 rounded-lg bg-blue-100">
+                  <Plus className="h-8 w-8 text-blue-500" />
+                </div>
+              )}
             </div>
           </SortableContext>
         )}
