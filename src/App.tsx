@@ -3,18 +3,19 @@ import Header from './components/Layout/Header';
 import Sidebar from './components/Layout/Sidebar';
 import ChatInterface from './components/Chat/ChatInterface';
 import FormPreview from './components/FormBuilder/FormPreview';
+import VisualFormBuilder from './components/FormBuilder/VisualFormBuilder';
 import CodeViewer from './components/FormBuilder/CodeViewer';
 import FormAnalytics from './components/FormBuilder/FormAnalytics';
 import ThemeCustomizer from './components/FormBuilder/ThemeCustomizer';
 import IntegrationManager from './components/FormBuilder/IntegrationManager';
 import A11yChecker from './components/FormBuilder/A11yChecker';
 import { Form, SelectedElement } from './types';
-import { MessageSquare, Eye, Code, BarChart3, Palette, Zap, Shield } from 'lucide-react';
+import { MessageSquare, Eye, Code, BarChart3, Palette, Zap, Shield, Layout } from 'lucide-react';
 
 function App() {
   const [selectedForm, setSelectedForm] = useState<Form | null>(null);
   const [generatedForm, setGeneratedForm] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'chat' | 'preview' | 'code' | 'analytics' | 'theme' | 'integrations' | 'accessibility'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'builder' | 'preview' | 'code' | 'analytics' | 'theme' | 'integrations' | 'accessibility'>('chat');
   const [selectedElements, setSelectedElements] = useState<SelectedElement[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentTheme, setCurrentTheme] = useState({
@@ -70,7 +71,7 @@ function App() {
 
   const handleFormGenerated = (formData: any) => {
     setGeneratedForm(formData);
-    setActiveTab('preview');
+    setActiveTab('builder');
   };
 
   const displayForm = generatedForm || selectedForm;
@@ -101,6 +102,19 @@ function App() {
               >
                 <MessageSquare className="h-4 w-4" />
                 <span>Chat</span>
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('builder')}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeTab === 'builder'
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+                disabled={!displayForm}
+              >
+                <Layout className="h-4 w-4" />
+                <span>Builder</span>
               </button>
               
               <button
@@ -190,6 +204,21 @@ function App() {
               <ChatInterface
                 selectedElements={selectedElements}
                 onFormGenerated={handleFormGenerated}
+              />
+            )}
+            
+            {activeTab === 'builder' && (
+              <VisualFormBuilder
+                form={displayForm}
+                onFormUpdate={(updatedForm) => {
+                  if (generatedForm) {
+                    setGeneratedForm(updatedForm);
+                  } else {
+                    setSelectedForm(updatedForm);
+                  }
+                }}
+                onPreview={() => setActiveTab('preview')}
+                onViewCode={() => setActiveTab('code')}
               />
             )}
             

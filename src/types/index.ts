@@ -117,3 +117,25 @@ export interface SelectedElement {
   data: any;
   path?: string;
 }
+
+export interface DragItem {
+  id: string;
+  type: 'element' | 'row' | 'section';
+  data: any;
+}
+
+export interface ElementTemplate {
+  id: string;
+  type: string;
+  label: string;
+  icon: string;
+  category: 'basic' | 'advanced' | 'layout' | 'media';
+  defaultProps: Partial<FormElement>;
+}
+
+export interface FormBuilderState {
+  selectedElement: SelectedElement | null;
+  draggedItem: DragItem | null;
+  showPropertyPanel: boolean;
+  activePageId: string | null;
+}
