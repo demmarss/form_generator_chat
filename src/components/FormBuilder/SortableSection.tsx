@@ -32,8 +32,13 @@ const SortableSection: React.FC<SortableSectionProps> = ({
   });
 
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
-    id: `section-drop-${section.id}`,
-    data: { type: 'section', sectionId: section.id, acceptsElements: true }
+    id: `section-${section.id}`,
+    data: { 
+      type: 'section', 
+      sectionId: section.id, 
+      acceptsElements: true,
+      section: section
+    }
   });
 
   const style = {

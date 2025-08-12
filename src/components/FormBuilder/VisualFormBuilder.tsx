@@ -83,35 +83,49 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
       elementNumber: 1
     };
 
-    // Find target row or create new one
-    let targetRow: FormRow;
-    let targetSection: FormSection;
+    console.log('Drop target:', dropTarget);
 
-    if (dropTarget?.rowId) {
-      // Add to existing row - find the section containing this row
-      targetSection = currentPage.sections.find(s => 
+    // Check if dropping on an existing row
+    if (dropTarget?.type === 'row' && dropTarget?.rowId) {
+      // Find the section and row
+      const targetSection = currentPage.sections.find(s => 
         s.rows.some(r => r.id === dropTarget.rowId)
-      )!;
-      targetRow = targetSection.rows.find(r => r.id === dropTarget.rowId)!;
-      newElement.rowId = targetRow.id;
-      newElement.elementNumber = targetRow.elements.length + 1;
-      targetRow.elements.push(newElement);
-    } else if (dropTarget?.sectionId) {
-      // Add to section - create new row
-      targetSection = currentPage.sections.find(s => s.id === dropTarget.sectionId)!;
-      targetRow = {
-        id: `row_${Date.now()}`,
-        sectionId: targetSection.id,
-        rowNumber: targetSection.rows.length + 1,
-        rowName: `${targetSection.title.toLowerCase().replace(/\s+/g, '_')}_row_${targetSection.rows.length + 1}`,
-        elements: []
-      };
-      targetSection.rows.push(targetRow);
-      newElement.rowId = targetRow.id;
-      targetRow.elements.push(newElement);
-    } else {
-      // Add to canvas - create section and row if needed
+      );
+      const targetRow = targetSection?.rows.find(r => r.id === dropTarget.rowId);
+      
+      if (targetRow) {
+        // Add element to existing row
+        newElement.rowId = targetRow.id;
+        newElement.elementNumber = targetRow.elements.length + 1;
+        targetRow.elements.push(newElement);
+        console.log('Added element to existing row:', targetRow.id);
+      }
+    }
+    // Check if dropping on a section (create new row)
+    else if (dropTarget?.type === 'section' && dropTarget?.sectionId) {
+      const targetSection = currentPage.sections.find(s => s.id === dropTarget.sectionId);
+      
+      if (targetSection) {
+        // Create new row in section
+        const newRow: FormRow = {
+          id: `row_${Date.now()}`,
+          sectionId: targetSection.id,
+          rowNumber: targetSection.rows.length + 1,
+          rowName: `${targetSection.title.toLowerCase().replace(/\s+/g, '_')}_row_${targetSection.rows.length + 1}`,
+          elements: []
+        };
+        targetSection.rows.push(newRow);
+        newElement.rowId = newRow.id;
+        newRow.elements.push(newElement);
+        console.log('Created new row in section:', targetSection.id);
+      }
+    }
+    // Default: add to canvas (create section and row if needed)
+    else {
+      let targetSection: FormSection;
+      
       if (currentPage.sections.length === 0) {
+        // Create first section
         targetSection = {
           id: `section_${Date.now()}`,
           pageId: currentPage.id,
@@ -124,16 +138,18 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
         targetSection = currentPage.sections[0];
       }
 
-      targetRow = {
+      // Create new row
+      const newRow: FormRow = {
         id: `row_${Date.now()}`,
         sectionId: targetSection.id,
         rowNumber: targetSection.rows.length + 1,
         rowName: `${targetSection.title.toLowerCase().replace(/\s+/g, '_')}_row_${targetSection.rows.length + 1}`,
         elements: []
       };
-      targetSection.rows.push(targetRow);
-      newElement.rowId = targetRow.id;
-      targetRow.elements.push(newElement);
+      targetSection.rows.push(newRow);
+      newElement.rowId = newRow.id;
+      newRow.elements.push(newElement);
+      console.log('Created new section/row on canvas');
     }
 
     onFormUpdate({ ...form });
