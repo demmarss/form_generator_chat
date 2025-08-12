@@ -10,12 +10,14 @@ interface SortableRowProps {
   row: FormRow;
   selectedElement: SelectedElement | null;
   onElementSelect: (element: SelectedElement) => void;
+  onRowAddElement: (rowId: string) => void;
 }
 
 const SortableRow: React.FC<SortableRowProps> = ({
   row,
   selectedElement,
-  onElementSelect
+  onElementSelect,
+  onRowAddElement
 }) => {
   const {
     attributes,
@@ -117,9 +119,12 @@ const SortableRow: React.FC<SortableRowProps> = ({
       {/* Row Content */}
       <div className="p-3">
         {row.elements.length === 0 ? (
-          <div className={`text-center py-8 border-2 border-dashed rounded-lg bg-white transition-colors ${
+          <div 
+            className={`text-center py-8 border-2 border-dashed rounded-lg bg-white transition-colors cursor-pointer hover:bg-gray-50 ${
             isOver ? 'border-blue-400 bg-blue-50' : 'border-gray-300'
-          }`}>
+          }`}
+            onClick={() => onRowAddElement(row.id)}
+          >
             <Plus className="h-6 w-6 text-gray-300 mx-auto mb-2" />
             <p className="text-gray-500 text-sm">
               Drop elements here or click the + button above to add elements

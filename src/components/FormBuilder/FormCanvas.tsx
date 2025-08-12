@@ -12,13 +12,15 @@ interface FormCanvasProps {
   selectedElement: SelectedElement | null;
   onElementSelect: (element: SelectedElement) => void;
   onAddRow: (sectionId: string) => void;
+  onRowAddElement: (rowId: string) => void;
 }
 
 const FormCanvas: React.FC<FormCanvasProps> = ({
   page,
   selectedElement,
   onElementSelect,
-  onAddRow
+  onAddRow,
+  onRowAddElement
 }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: 'form-canvas',
@@ -77,6 +79,7 @@ const FormCanvas: React.FC<FormCanvasProps> = ({
               selectedElement={selectedElement}
               onElementSelect={onElementSelect}
               onAddRow={onAddRow}
+              onRowAddElement={onRowAddElement}
               onRowAddElement={onRowAddElement}
             />
           ))}

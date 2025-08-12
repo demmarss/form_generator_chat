@@ -11,13 +11,15 @@ interface SortableSectionProps {
   selectedElement: SelectedElement | null;
   onElementSelect: (element: SelectedElement) => void;
   onAddRow: (sectionId: string) => void;
+  onRowAddElement: (rowId: string) => void;
 }
 
 const SortableSection: React.FC<SortableSectionProps> = ({
   section,
   selectedElement,
   onElementSelect,
-  onAddRow
+  onAddRow,
+  onRowAddElement
 }) => {
   const {
     attributes,
