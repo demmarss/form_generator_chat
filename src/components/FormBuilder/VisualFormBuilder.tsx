@@ -311,7 +311,10 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
                 <div className="space-y-3">
                   {modalData.targetRow && (
                     <button
-                      onClick={() => handleModalChoice('existing')}
+                     onClick={() => {
+                       handleAddElement(modalData.template!, { type: 'row', rowId: modalData.targetRow!.id }, 'existing');
+                       setShowAddModal(false);
+                     }}
                       className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors"
                     >
                       <div className="font-medium text-gray-900">Add to existing row</div>
@@ -321,7 +324,10 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
                     </button>
                   )}
                   <button
-                    onClick={() => handleModalChoice('new')}
+                   onClick={() => {
+                     handleAddElement(modalData.template!, { type: 'section', sectionId: modalData.targetSection!.id }, 'new');
+                     setShowAddModal(false);
+                   }}
                     className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
                   >
                     <div className="font-medium text-gray-900">Create new row</div>
@@ -330,10 +336,10 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
                     </div>
                   </button>
                 </div>
-                <div className="flex justify-end mt-6">
+               <div className="flex justify-end space-x-3 mt-6">
                   <button
                     onClick={() => setShowAddModal(false)}
-                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Cancel
                   </button>
