@@ -249,6 +249,21 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
     onFormUpdate({ ...form });
   };
 
+  const handleRowAddElement = (rowId: string) => {
+    setSelectedRowForAdd(currentPage.sections
+      .flatMap(s => s.rows)
+      .find(r => r.id === rowId) || null);
+    setShowElementSelector(true);
+  };
+
+  const handleElementSelectorChoice = (template: ElementTemplate) => {
+    if (!selectedRowForAdd) return;
+    
+    handleAddElement(template, { type: 'row', rowId: selectedRowForAdd.id }, 'existing');
+    setShowElementSelector(false);
+    setSelectedRowForAdd(null);
+  };
+
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="h-full flex bg-gray-50">
