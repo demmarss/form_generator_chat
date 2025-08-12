@@ -275,6 +275,7 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
               selectedElement={selectedElement}
               onElementSelect={handleElementSelect}
               onAddRow={handleAddRow}
+              onRowAddElement={handleRowAddElement}
             />
           </div>
         </div>

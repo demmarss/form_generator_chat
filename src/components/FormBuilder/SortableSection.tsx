@@ -153,6 +153,7 @@ const SortableSection: React.FC<SortableSectionProps> = ({
                   row={row}
                   selectedElement={selectedElement}
                   onElementSelect={onElementSelect}
+                  onRowAddElement={onRowAddElement}
                 />
               ))}
             </div>
