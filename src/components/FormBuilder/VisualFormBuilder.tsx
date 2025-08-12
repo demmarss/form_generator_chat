@@ -341,7 +341,7 @@ const VisualFormBuilder: React.FC<VisualFormBuilderProps> = ({
                   )}
                   <button
                    onClick={() => {
-                     handleAddElement(modalData.template!, { type: 'section', sectionId: modalData.targetSection!.id }, 'new');
+                     handleAddElement(modalData.template!, { type: 'section', sectionId: modalData.targetSection?.id }, 'new');
                      setShowAddModal(false);
                    }}
                     className="w-full p-4 text-left border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors"
